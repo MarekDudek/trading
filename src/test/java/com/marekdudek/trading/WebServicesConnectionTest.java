@@ -5,6 +5,7 @@ import org.junit.Test;
 import javax.websocket.*;
 import java.net.URI;
 
+import static java.lang.System.err;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -32,5 +33,23 @@ public final class WebServicesConnectionTest {
         final RemoteEndpoint.Basic remote = session.getBasicRemote();
         remote.sendText(SUBSCRIPTION);
         session.close();
+    }
+
+    @Test
+    public void periodically_receive_messages() throws Exception {
+        final WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+        final URI uri = URI.create(BITFINEX_URI);
+        final Session session = container.connectToServer(this, uri);
+        final RemoteEndpoint.Basic remote = session.getBasicRemote();
+        remote.sendText(SUBSCRIPTION);
+        err.println("Sleeping ...");
+        Thread.sleep(10_000);
+        err.println("... done.");
+    }
+
+    @OnMessage
+    public void onMessage(final Session session, final String message) {
+
+        err.format("Message received: '%s'%n", message);
     }
 }
