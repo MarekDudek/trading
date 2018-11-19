@@ -1,8 +1,11 @@
 package com.marekdudek.trading;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import javax.websocket.*;
+import java.io.IOException;
 import java.net.URI;
 
 import static java.lang.System.err;
@@ -43,13 +46,15 @@ public final class WebServicesConnectionTest {
         final RemoteEndpoint.Basic remote = session.getBasicRemote();
         remote.sendText(SUBSCRIPTION);
         err.println("Sleeping ...");
-        Thread.sleep(10_000);
+        Thread.sleep(1_000);
         err.println("... done.");
     }
 
-    @OnMessage
-    public void onMessage(final Session session, final String message) {
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
-        err.format("Message received: '%s'%n", message);
+    @OnMessage
+    public void onMessage(final Session session, final String message) throws IOException {
+        final JsonNode node = objectMapper.readTree(message);
+        err.format("%s%n", node);
     }
 }
